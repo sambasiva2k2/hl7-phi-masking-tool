@@ -14,6 +14,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { fi } from '@faker-js/faker';
+import { MatIconModule } from '@angular/material/icon';
+
 
 
 export interface DialogData {
@@ -44,7 +46,7 @@ interface matDataModel {
 @Component({
   selector: 'dialog-data-example',
   templateUrl: './dialog.html',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, MatIconModule],
 })
 export class DialogDataExample {
   @Input() control!: FormGroup;
@@ -87,7 +89,8 @@ export class DialogDataExample {
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatIconModule
   ],
 })
 export class DialogDataExampleDialog {

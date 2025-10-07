@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -14,9 +14,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { faker, fi } from '@faker-js/faker';
-import {MatTabsModule} from '@angular/material/tabs';
-import { DialogDataExampleDialog, DialogDataExample } from "../dialog/dialog";
-
+import { MatTabsModule } from '@angular/material/tabs';
+import { DialogDataExampleDialog, DialogDataExample } from '../dialog/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface field {
   field: number;
@@ -45,12 +46,15 @@ interface fieldDefinitions {
     MatSelectModule,
     MatButtonModule,
     MatTabsModule,
-    DialogDataExample
-],
+    DialogDataExample,
+    MatTooltipModule,
+  ],
   templateUrl: './phi-mask.html',
   styleUrl: './phi-mask.css',
 })
 export class PhiMask {
+  private _snackBar = inject(MatSnackBar);
+
   phiInputFormControl = new FormControl('', [Validators.required]);
 
   addFieldsToMaskForm = new FormGroup({
@@ -93,6 +97,10 @@ export class PhiMask {
       };
       localStorage.setItem('fieldsToMask', JSON.stringify(this.fieldsToMask));
     }
+  }
+
+  openSnackBar(message: string, action: string) {
+    this._snackBar.open(message, action);
   }
 
   // ngOnInit() {
@@ -209,10 +217,11 @@ export class PhiMask {
     const text: string = this.maskedPhiValue || '';
     console.log(text);
     const successful = this.clipboard.copy(text);
+    this.openSnackBar("Successfully Copied to clipboard", "Close")
   }
 
   clearPreferences() {
     localStorage.clear();
-    this.fieldsToMask = {}
+    this.fieldsToMask = {};
   }
 }
