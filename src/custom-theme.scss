@@ -6,6 +6,7 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
+
 html {
   @include mat.theme((
     color: (
@@ -32,4 +33,12 @@ body {
 
   // Reset the user agent margin.
   margin: 0;
+}
+
+
+
+.my-custom-theme {
+ @include mat.button-overrides((
+    tonal-container-shape: 0px,
+  ));
 }

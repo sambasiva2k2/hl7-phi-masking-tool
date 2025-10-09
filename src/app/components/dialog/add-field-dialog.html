@@ -1,0 +1,79 @@
+<div class="flex flex-col">
+  <h3 class="text-lg font-bold text-center">Add a new field to mask</h3>
+  <form class="example-form" [formGroup]="data.addFieldsToMaskForm">
+    <div class="flex flex-col justify-between mr-[5%] ml-[5%]">
+      <mat-form-field class="example-full-width">
+        <mat-label>Segment</mat-label>
+        <input matInput placeholder="Enter Segment" formControlName="segment" />
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Field</mat-label>
+        <input
+          matInput
+          placeholder="Enter Field Position"
+          formControlName="field"
+          pattern="[0-9]*"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Sub Field</mat-label>
+        <input
+          matInput
+          placeholder="Enter Sub Field Position"
+          formControlName="subField"
+          pattern="[0-9]*"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width">
+        <mat-label>Field Name</mat-label>
+        <input matInput placeholder="Enter Name of the field" formControlName="fieldName" />
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width">
+        <mat-label>Min Length</mat-label>
+        <input matInput placeholder="Enter Length" formControlName="minLength" pattern="[0-9]*" />
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width">
+        <mat-label>Max Length</mat-label>
+        <input matInput placeholder="Enter Length" formControlName="length" pattern="[0-9]*" />
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width">
+        <mat-label>Mask Type</mat-label>
+        <mat-select formControlName="type">
+          @for (type of data.maskingTypes; track type) {
+          <mat-option [value]="type.value">{{ type.viewValue }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if(data.addFieldsToMaskForm.value.type == 'ValueSet') {
+      <mat-form-field class="example-full-width">
+        <mat-label>Enter one value per line</mat-label>
+        <textarea
+          class="textarea-full-width"
+          matInput
+          formControlName="valueSet"
+          placeholder="Paste the HL7 Message Here"
+        ></textarea>
+      </mat-form-field>
+      }
+    </div>
+
+    <div class="flex flex-row justify-center">
+      <button [disabled]="!data.addFieldsToMaskForm.valid" (click)="addField()" matButton="filled">
+        <mat-icon>check_circle_outline</mat-icon> Submit
+      </button>
+      <button
+        style="background-color: #222324"
+        (click)="data.addFieldsToMaskForm.reset()"
+        matButton="filled"
+        ButtonType="reset"
+      >
+        <mat-icon>cancel</mat-icon> Reset
+      </button>
+    </div>
+  </form>
+</div>

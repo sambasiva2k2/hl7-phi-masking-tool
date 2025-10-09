@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { KeyValuePipe } from '@angular/common';
@@ -15,20 +15,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { faker, fi } from '@faker-js/faker';
 import { MatTabsModule } from '@angular/material/tabs';
-import { DialogDataExampleDialog, DialogDataExample } from '../dialog/dialog';
+import { ShowFieldsDialog, DialogButton } from '../dialog/dialog-button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-interface field {
-  field: number;
-  subField?: number | null;
-  type: 'Digits' | 'Alphabets' | 'AlphaNumeric';
-  length: number;
-}
-
-interface fieldDefinitions {
-  [key: string]: field[];
-}
+import { StateService } from '../../services/state';
 
 @Component({
   selector: 'app-phi-mask',
@@ -46,18 +36,19 @@ interface fieldDefinitions {
     MatSelectModule,
     MatButtonModule,
     MatTabsModule,
-    DialogDataExample,
+    DialogButton,
     MatTooltipModule,
   ],
   templateUrl: './phi-mask.html',
   styleUrl: './phi-mask.css',
 })
 export class PhiMask {
+  stateService = inject(StateService);
   private _snackBar = inject(MatSnackBar);
 
   phiInputFormControl = new FormControl('', [Validators.required]);
 
-  addFieldsToMaskForm = new FormGroup({
+  addFieldsToMaskForm: any = new FormGroup({
     segment: new FormControl(null, [
       Validators.required,
       Validators.minLength(3),
@@ -66,53 +57,105 @@ export class PhiMask {
     field: new FormControl(null, [Validators.required]),
     type: new FormControl(null, [Validators.required]),
     length: new FormControl(null, [Validators.required]),
+    minLength: new FormControl(null, [Validators.required]),
     subField: new FormControl(null),
+    fieldName: new FormControl(null, [Validators.required]),
+    valueSet: new FormControl([]),
   });
 
   maskedPhiValue: string = '';
   showResults: boolean = false;
 
-  fieldsToMask: fieldDefinitions = {};
-
   maskingTypes = [
     { value: 'Digits', viewValue: 'Digits' },
     { value: 'Alphabets', viewValue: 'Alphabets' },
-    { value: 'AlphaNumeric', viewValue: 'AlphaNumeric' },
+    { value: 'AlphaNumeric', viewValue: 'Alpha Numeric' },
+    { value: 'ValueSet', viewValue: 'Value Set' },
+    { value: 'Date', viewValue: 'Date' },
   ];
 
   constructor(private clipboard: Clipboard) {
     let existingFieldsToMaskValue = localStorage.getItem('fieldsToMask');
     if (existingFieldsToMaskValue) {
-      this.fieldsToMask = JSON.parse(existingFieldsToMaskValue);
+      this.stateService.setFieldsToMask(JSON.parse(existingFieldsToMaskValue));
     } else {
-      this.fieldsToMask = {
+      this.stateService.setFieldsToMask({
         PID: [
-          { field: 3, type: 'AlphaNumeric', subField: 1, length: 15 },
-          { field: 4, type: 'AlphaNumeric', subField: 1, length: 15 },
-          { field: 5, type: 'AlphaNumeric', subField: 1, length: 20 },
-          { field: 5, type: 'AlphaNumeric', subField: 2, length: 20 },
-          { field: 5, type: 'AlphaNumeric', subField: 3, length: 20 },
-          { field: 7, type: 'Digits', subField: 1, length: 24 },
+          {
+            field: 3,
+            type: 'AlphaNumeric',
+            subField: 1,
+            length: 15,
+            minLength: 6,
+            fieldName: 'Patient Identifier List - ID',
+          },
+          {
+            field: 4,
+            type: 'AlphaNumeric',
+            subField: 1,
+            length: 15,
+            minLength: 6,
+            fieldName: 'Alternate Patient Identifier List - ID',
+          },
+          {
+            field: 5,
+            type: 'AlphaNumeric',
+            subField: 1,
+            length: 20,
+            minLength: 6,
+            fieldName: 'Patient Family Name',
+          },
+          {
+            field: 5,
+            type: 'AlphaNumeric',
+            subField: 2,
+            length: 20,
+            minLength: 6,
+            fieldName: 'Patient Given Name',
+          },
+          {
+            field: 5,
+            type: 'AlphaNumeric',
+            subField: 3,
+            length: 20,
+            minLength: 6,
+            fieldName: 'Patient Second Name',
+          },
+          {
+            field: 7,
+            type: 'Date',
+            subField: 1,
+            length: 8,
+            minLength: 8,
+            fieldName: 'Patient DOB',
+          },
+          {
+            field: 8,
+            type: 'ValueSet',
+            length: 1,
+            minLength: 1,
+            fieldName: 'Administrative Sex',
+            valueSet: ['F', 'M'],
+          },
         ],
-      };
-      localStorage.setItem('fieldsToMask', JSON.stringify(this.fieldsToMask));
+        IN1: [
+          {
+            field: 2,
+            subField: 1,
+            type: 'Digits',
+            length: 20,
+            minLength: 6,
+            fieldName: 'Insurance Plan ID',
+          },
+        ],
+      });
+      localStorage.setItem('fieldsToMask', JSON.stringify(this.stateService.FieldsToMask));
     }
   }
 
   openSnackBar(message: string, action: string) {
     this._snackBar.open(message, action);
   }
-
-  // ngOnInit() {
-  //   this.phiInputFormControl.statusChanges.subscribe((val) => {
-  //     if(val == 'VALID') {
-  //       this.showResults = true;
-  //     }
-  //     else {
-  //       this.showResults = false;
-  //     }
-  //   })
-  // }
 
   maskPhi() {
     console.log(this.phiInputFormControl.value);
@@ -122,18 +165,39 @@ export class PhiMask {
       console.log(split);
       for (let [i, seg] of split.entries()) {
         let splittedFields = seg.split('|');
-        if (splittedFields[0] in this.fieldsToMask) {
+        if (splittedFields[0] in this.stateService.FieldsToMask) {
           for (let [index, val] of splittedFields.entries()) {
-            let fields = this.fieldsToMask[splittedFields[0]];
+            let fields = this.stateService.FieldsToMask[splittedFields[0]];
             for (let field of fields) {
               if (field.field == index) {
                 if (field.subField == null || field.subField == undefined) {
                   if (field.type == 'Digits') {
-                    splittedFields[index] = String(faker.number.int(field.length)).toUpperCase();
+                    splittedFields[index] = String(
+                      faker.number.int({ min: field.minLength, max: field.length })
+                    ).toUpperCase();
                   } else if (field.type == 'Alphabets') {
-                    splittedFields[index] = faker.string.alpha(field.length).toUpperCase();
+                    splittedFields[index] = faker.string
+                      .alpha({ length: { min: field.minLength, max: field.length } })
+                      .toUpperCase();
                   } else if (field.type == 'AlphaNumeric') {
-                    splittedFields[index] = faker.string.alphanumeric(field.length).toUpperCase();
+                    splittedFields[index] = faker.string
+                      .alphanumeric({ length: { min: field.minLength, max: field.length } })
+                      .toUpperCase();
+                  } else if (field.type == 'ValueSet') {
+                    if (field.valueSet) {
+                      splittedFields[index] = faker.helpers.arrayElement(field.valueSet);
+                    }
+                  } else if (field.type == 'Date') {
+                    // Generate a date of birth in the past (e.g., up to 18 years ago)
+                    const dobDate = faker.date.past({
+                      years: 80,
+                      refDate: '2006-01-01T00:00:00.000Z',
+                    });
+
+                    // Format the date to YYYY-MM-DD
+                    const formattedDob: any = dobDate.toISOString().split('T')[0];
+
+                    splittedFields[index] = formattedDob.replaceAll('-', '');
                   }
                 } else {
                   let value = splittedFields[index];
@@ -141,11 +205,32 @@ export class PhiMask {
                   for (let [index, subVal] of splitted.entries()) {
                     if (index == field.subField - 1) {
                       if (field.type == 'Digits') {
-                        splitted[index] = String(faker.number.int(field.length)).toUpperCase();
+                        splitted[index] = String(
+                          faker.number.int({ min: field.minLength, max: field.length })
+                        ).toUpperCase();
                       } else if (field.type == 'Alphabets') {
-                        splitted[index] = faker.string.alpha(field.length).toUpperCase();
+                        splitted[index] = faker.string
+                          .alpha({ length: { min: field.minLength, max: field.length } })
+                          .toUpperCase();
                       } else if (field.type == 'AlphaNumeric') {
-                        splitted[index] = faker.string.alphanumeric(field.length).toUpperCase();
+                        splitted[index] = faker.string
+                          .alphanumeric({ length: { min: field.minLength, max: field.length } })
+                          .toUpperCase();
+                      } else if (field.type == 'ValueSet') {
+                        if (field.valueSet) {
+                          splitted[index] = faker.helpers.arrayElement(field.valueSet);
+                        }
+                      } else if (field.type == 'Date') {
+                        // Generate a date of birth in the past (e.g., up to 18 years ago)
+                        const dobDate = faker.date.past({
+                          years: 80,
+                          refDate: '2006-01-01T00:00:00.000Z',
+                        });
+
+                        // Format the date to YYYY-MM-DD
+                        const formattedDob: any = dobDate.toISOString().split('T')[0];
+
+                        splitted[index] = formattedDob.replaceAll('-', '');
                       }
                       break;
                     }
@@ -171,26 +256,39 @@ export class PhiMask {
 
     console.log(this.addFieldsToMaskForm);
     let value = this.addFieldsToMaskForm.value;
-    if (value && value.segment && value.field && value.type && value.length) {
-      if (value.segment in this.fieldsToMask) {
-        this.fieldsToMask[value.segment].push({
+    if (value && value.segment && value.field && value.type && value.length && value.fieldName) {
+      let valueSet = [];
+      if (value && value.valueSet) {
+        valueSet = value.valueSet.split('\n');
+      }
+      if (value.segment in this.stateService.FieldsToMask) {
+        this.stateService.addFieldToMask(value.segment, {
           field: parseInt(value.field),
           type: value.type,
           length: parseInt(value.length),
-          subField: value.subField,
+          subField: parseInt(value.subField),
+          fieldName: value.fieldName,
+          valueSet: valueSet,
+          minLength: parseInt(value.minLength),
         });
       } else {
-        this.fieldsToMask[value.segment] = [];
-        this.fieldsToMask[value.segment].push({
+        this.stateService.FieldsToMask[value.segment] = [];
+        this.stateService.addFieldToMask(value.segment, {
           field: parseInt(value.field),
           type: value.type,
           length: parseInt(value.length),
-          subField: value.subField,
+          subField: parseInt(value.subField),
+          fieldName: value.fieldName,
+          valueSet: valueSet,
+          minLength: parseInt(value.minLength),
         });
       }
     }
-    localStorage.setItem('fieldsToMask', JSON.stringify(this.fieldsToMask));
-    this.maskPhi();
+    localStorage.setItem('fieldsToMask', JSON.stringify(this.stateService.FieldsToMask));
+    this.addFieldsToMaskForm.reset();
+    if (this.phiInputFormControl.dirty) {
+      this.maskPhi();
+    }
   }
 
   // copyToClipboard() {
@@ -217,11 +315,11 @@ export class PhiMask {
     const text: string = this.maskedPhiValue || '';
     console.log(text);
     const successful = this.clipboard.copy(text);
-    this.openSnackBar("Successfully Copied to clipboard", "Close")
+    this.openSnackBar('Successfully Copied to clipboard', 'Close');
   }
 
   clearPreferences() {
     localStorage.clear();
-    this.fieldsToMask = {};
+    this.stateService.setFieldsToMask({});
   }
 }

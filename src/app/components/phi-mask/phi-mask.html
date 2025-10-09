@@ -1,10 +1,5 @@
 <div class="flex flex-col justify-center">
   <div class="flex flex-row justify-center">
-    <!-- <textarea
-      [formControl]="phiInputFormControl"
-      class="w-[70vw] h-[35vh] p-4 mt-10 border border-gray-300 rounded-md text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      placeholder="Paste the HL7 Message Here"
-    ></textarea> -->
     <form class="textarea-form">
       <mat-form-field class="textarea-full-width">
         <mat-label>Enter HL7 Message</mat-label>
@@ -19,14 +14,13 @@
   </div>
 
   <div class="flex flex-row justify-center">
-    <dialog-data-example
+    <dialog-button
       [control]="addFieldsToMaskForm"
-      [data]="fieldsToMask"
       [dialogButtonText]="'Show Configuration'"
       [addFieldsToMaskForm]="addFieldsToMaskForm"
       [maskingTypes]="maskingTypes"
       (addEvent)="addFieldToMask()"
-    ></dialog-data-example>
+    ></dialog-button>
     <button
       [disabled]="!(phiInputFormControl.valid && phiInputFormControl.value?.slice(0, 3) == 'MSH')"
       (click)="maskPhi()"
@@ -44,7 +38,7 @@
     </button>
   </div>
   @if (phiInputFormControl.dirty && phiInputFormControl.valid && showResults) {
-  <div>
+  <div class="mt-[20px]">
     <!-- <textarea
       id="maskedPhiValueArea"
       class="w-[70vw] h-[35vh] p-4 border border-gray-300 rounded-md text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pointer-events-none"

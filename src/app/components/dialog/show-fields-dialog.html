@@ -1,0 +1,74 @@
+<div class="flex flex-col m-5">
+  <div class="text-right">
+    <button class="my-custom-theme" matButton="tonal" (click)="openDialog()">
+      <mat-icon>add_circle</mat-icon>Add Field
+    </button>
+  </div>
+  <div>
+    <mat-tab-group preserveContent>
+      @for (item of dataSources| keyvalue; track $index) {
+      <mat-tab [label]="item.key">
+        <table mat-table [dataSource]="item.value" class="mat-elevation-z8">
+          <ng-container matColumnDef="field">
+            <th mat-header-cell *matHeaderCellDef>Field</th>
+            <td mat-cell *matCellDef="let element">
+              @if(element && element.subField) {
+              {{ item.key }}-{{ element.field }}.{{ element.subField }}
+              } @else {
+              {{ item.key }}-{{ element.field }}
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fieldName">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let element">{{ element.fieldName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="length">
+            <th mat-header-cell *matHeaderCellDef>Length</th>
+            <td mat-cell *matCellDef="let element">{{ element.length }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Value Type</th>
+            <td mat-cell *matCellDef="let element">
+              @if(element.type == 'ValueSet') {
+              <button matTooltip="{{ element.valueSet }}" matButton="tonal">
+                {{ element.type }}
+              </button>
+              } @else {
+              <p matButton="tonal">{{ element.type }}</p>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="delete">
+            <th mat-header-cell *matHeaderCellDef>Remove</th>
+            <td mat-cell *matCellDef="let element">
+              <img
+                alt="Remove Field From Configuration"
+                class="h-6 w-6 cursor-pointer"
+                (click)="removeField(element, item.key)"
+                src="x-circle-fill.svg"
+              />
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+        <mat-paginator
+          #paginator="matPaginator"
+          [id]="'paginator-' + item.key"
+          [pageSizeOptions]="[5, 10, 20]"
+          showFirstLastButtons
+          aria-label="Select page of Fields"
+        >
+        </mat-paginator>
+      </mat-tab>
+
+      }
+    </mat-tab-group>
+  </div>
+</div>
