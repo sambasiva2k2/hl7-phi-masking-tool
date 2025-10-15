@@ -19,6 +19,7 @@ import { ShowFieldsDialog, DialogButton } from '../dialog/dialog-button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { StateService } from '../../services/state';
+import {MatDividerModule} from '@angular/material/divider';
 
 @Component({
   selector: 'app-phi-mask',
@@ -37,6 +38,7 @@ import { StateService } from '../../services/state';
     MatButtonModule,
     MatTabsModule,
     DialogButton,
+    MatDividerModule,
     MatTooltipModule,
   ],
   templateUrl: './phi-mask.html',
