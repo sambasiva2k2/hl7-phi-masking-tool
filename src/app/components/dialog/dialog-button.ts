@@ -118,9 +118,13 @@ export class ShowFieldsDialog {
       this.dataSources = {};
       console.log('Value of signal right now');
       console.log(this.stateService.FieldsToMask);
-      for (let segment in this.stateService.FieldsToMask) {
-        this.dataSources[segment] = new MatTableDataSource(this.stateService.FieldsToMask[segment]);
-      }
+      setTimeout(() => {
+        for (let segment in this.stateService.FieldsToMask) {
+          this.dataSources[segment] = new MatTableDataSource(
+            this.stateService.FieldsToMask[segment]
+          );
+        }
+      });
     });
   }
 

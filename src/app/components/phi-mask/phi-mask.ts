@@ -260,7 +260,7 @@ export class PhiMask {
     let value = this.addFieldsToMaskForm.value;
     if (value && value.segment && value.field && value.type && value.length && value.fieldName) {
       let valueSet = [];
-      if (value && value.valueSet) {
+      if (value && value.valueSet && value.valueSet.length > 0) {
         valueSet = value.valueSet.split('\n');
       }
       if (value.segment in this.stateService.FieldsToMask) {
