@@ -6,5 +6,5 @@ export const routes: Routes = [
     title: 'PHI Masking Tool',
     path: '',
     component: PhiMask,
-  },
+  }
 ];

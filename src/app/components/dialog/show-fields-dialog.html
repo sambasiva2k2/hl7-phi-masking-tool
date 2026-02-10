@@ -1,73 +1,87 @@
 <div class="flex flex-col m-5">
-  <div class="text-right">
-    <button class="my-custom-theme" matButton="tonal" (click)="openDialog()">
-      <mat-icon>add_circle</mat-icon>Add Field
+  <div class="text-left">
+    <button
+      (click)="openDialog()"
+      class="flex items-center gap-2 px-4 py-2 bg-[#1B998B] text-white rounded-md transition-all font-medium border border-gray-300 cursor-pointer"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-plus"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
+        />
+      </svg>
+      Add Field
     </button>
   </div>
   <div>
-    <mat-tab-group preserveContent>
-      @for (item of dataSources| keyvalue; track $index) {
-      <mat-tab [label]="item.key">
-        <table mat-table [dataSource]="item.value" class="mat-elevation-z8">
-          <ng-container matColumnDef="field">
-            <th mat-header-cell *matHeaderCellDef>Field</th>
-            <td mat-cell *matCellDef="let element">
-              @if(element && element.subField) {
-              {{ item.key }}-{{ element.field }}.{{ element.subField }}
-              } @else {
-              {{ item.key }}-{{ element.field }}
-              }
-            </td>
-          </ng-container>
+      <mat-tab-group preserveContent>
+      @for (item of tabs; track item) {
+        <mat-tab [label]="item">
+          <table mat-table [dataSource]="dataSources[item]" class="mat-elevation-z8">
+            <ng-container matColumnDef="field">
+              <th mat-header-cell *matHeaderCellDef>Field</th>
+              <td mat-cell *matCellDef="let element">
+                @if (element && element.subField) {
+                  {{ item }}-{{ element.field }}.{{ element.subField }}
+                } @else {
+                  {{ item }}-{{ element.field }}
+                }
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="fieldName">
-            <th mat-header-cell *matHeaderCellDef>Name</th>
-            <td mat-cell *matCellDef="let element">{{ element.fieldName }}</td>
-          </ng-container>
+            <ng-container matColumnDef="fieldName">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let element">{{ element.fieldName }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="length">
-            <th mat-header-cell *matHeaderCellDef>Length</th>
-            <td mat-cell *matCellDef="let element">{{ element.length }}</td>
-          </ng-container>
+            <ng-container matColumnDef="length">
+              <th mat-header-cell *matHeaderCellDef>Length</th>
+              <td mat-cell *matCellDef="let element">{{ element.length }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef>Value Type</th>
-            <td mat-cell *matCellDef="let element">
-              @if(element.type == 'ValueSet') {
-              <button matTooltip="{{ element.valueSet }}" matButton="tonal">
-                {{ element.type }}
-              </button>
-              } @else {
-              <p matButton="tonal">{{ element.type }}</p>
-              }
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Value Type</th>
+              <td mat-cell *matCellDef="let element">
+                @if (element.type == 'ValueSet') {
+                  <button matTooltip="{{ element.valueSet }}" matButton="tonal">
+                    {{ element.type }}
+                  </button>
+                } @else {
+                  <p matButton="tonal">{{ element.type }}</p>
+                }
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="delete">
-            <th mat-header-cell *matHeaderCellDef>Remove</th>
-            <td mat-cell *matCellDef="let element">
-              <img
-                alt="Remove Field From Configuration"
-                class="h-6 w-6 cursor-pointer"
-                (click)="removeField(element, item.key)"
-                src="x-circle-fill.svg"
-              />
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="delete">
+              <th mat-header-cell *matHeaderCellDef>Remove</th>
+              <td mat-cell *matCellDef="let element">
+                <img
+                  alt="Remove Field From Configuration"
+                  class="h-6 w-6 cursor-pointer"
+                  (click)="removeField(element, item)"
+                  src="x-circle-fill.svg"
+                />
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
-        <mat-paginator
-          #paginator="matPaginator"
-          [id]="'paginator-' + item.key"
-          [pageSizeOptions]="[5, 10, 20]"
-          showFirstLastButtons
-          aria-label="Select page of Fields"
-        >
-        </mat-paginator>
-      </mat-tab>
-
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+          <mat-paginator
+            #paginator="matPaginator"
+            [id]="'paginator-' + item"
+            [pageSizeOptions]="[5, 10, 20]"
+            showFirstLastButtons
+            aria-label="Select page of Fields"
+          >
+          </mat-paginator>
+        </mat-tab>
       }
     </mat-tab-group>
   </div>

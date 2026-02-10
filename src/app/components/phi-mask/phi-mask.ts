@@ -15,11 +15,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { faker, fi } from '@faker-js/faker';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ShowFieldsDialog, DialogButton } from '../dialog/dialog-button';
+import {  DialogButton } from '../dialog/dialog-button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { StateService } from '../../services/state';
 import {MatDividerModule} from '@angular/material/divider';
+import defaultValuesToMask from './default-values-to-mask';
+import sampleHL7 from './sample';
 
 @Component({
   selector: 'app-phi-mask',
@@ -37,7 +39,6 @@ import {MatDividerModule} from '@angular/material/divider';
     MatSelectModule,
     MatButtonModule,
     MatTabsModule,
-    DialogButton,
     MatDividerModule,
     MatTooltipModule,
   ],
@@ -50,107 +51,19 @@ export class PhiMask {
 
   phiInputFormControl = new FormControl('', [Validators.required]);
 
-  addFieldsToMaskForm: any = new FormGroup({
-    segment: new FormControl(null, [
-      Validators.required,
-      Validators.minLength(3),
-      Validators.maxLength(3),
-    ]),
-    field: new FormControl(null, [Validators.required]),
-    type: new FormControl(null, [Validators.required]),
-    length: new FormControl(null, [Validators.required]),
-    minLength: new FormControl(null, [Validators.required]),
-    subField: new FormControl(null),
-    fieldName: new FormControl(null, [Validators.required]),
-    valueSet: new FormControl([]),
-  });
+
 
   maskedPhiValue: string = '';
   showResults: boolean = false;
 
-  maskingTypes = [
-    { value: 'Digits', viewValue: 'Digits' },
-    { value: 'Alphabets', viewValue: 'Alphabets' },
-    { value: 'AlphaNumeric', viewValue: 'Alpha Numeric' },
-    { value: 'ValueSet', viewValue: 'Value Set' },
-    { value: 'Date', viewValue: 'Date' },
-  ];
+
 
   constructor(private clipboard: Clipboard) {
     let existingFieldsToMaskValue = localStorage.getItem('fieldsToMask');
-    if (existingFieldsToMaskValue) {
+    if (existingFieldsToMaskValue && (Object.keys(JSON.parse(existingFieldsToMaskValue)).length != 0)) {
       this.stateService.setFieldsToMask(JSON.parse(existingFieldsToMaskValue));
     } else {
-      this.stateService.setFieldsToMask({
-        PID: [
-          {
-            field: 3,
-            type: 'AlphaNumeric',
-            subField: 1,
-            length: 15,
-            minLength: 6,
-            fieldName: 'Patient Identifier List - ID',
-          },
-          {
-            field: 4,
-            type: 'AlphaNumeric',
-            subField: 1,
-            length: 15,
-            minLength: 6,
-            fieldName: 'Alternate Patient Identifier List - ID',
-          },
-          {
-            field: 5,
-            type: 'AlphaNumeric',
-            subField: 1,
-            length: 20,
-            minLength: 6,
-            fieldName: 'Patient Family Name',
-          },
-          {
-            field: 5,
-            type: 'AlphaNumeric',
-            subField: 2,
-            length: 20,
-            minLength: 6,
-            fieldName: 'Patient Given Name',
-          },
-          {
-            field: 5,
-            type: 'AlphaNumeric',
-            subField: 3,
-            length: 20,
-            minLength: 6,
-            fieldName: 'Patient Second Name',
-          },
-          {
-            field: 7,
-            type: 'Date',
-            subField: 1,
-            length: 8,
-            minLength: 8,
-            fieldName: 'Patient DOB',
-          },
-          {
-            field: 8,
-            type: 'ValueSet',
-            length: 1,
-            minLength: 1,
-            fieldName: 'Administrative Sex',
-            valueSet: ['F', 'M'],
-          },
-        ],
-        IN1: [
-          {
-            field: 2,
-            subField: 1,
-            type: 'Digits',
-            length: 20,
-            minLength: 6,
-            fieldName: 'Insurance Plan ID',
-          },
-        ],
-      });
+      this.stateService.setFieldsToMask(defaultValuesToMask);
       localStorage.setItem('fieldsToMask', JSON.stringify(this.stateService.FieldsToMask));
     }
   }
@@ -246,72 +159,12 @@ export class PhiMask {
         split[i] = splittedFields.join('|');
       }
 
-      //this.phiInputFormControl.setValue(split.join('\n'));
       this.maskedPhiValue = split.join('\n');
     }
     this.showResults = true;
   }
 
-  addFieldToMask() {
-    console.log(this.addFieldsToMaskForm.value);
-    console.log(this.addFieldsToMaskForm.valid);
 
-    console.log(this.addFieldsToMaskForm);
-    let value = this.addFieldsToMaskForm.value;
-    if (value && value.segment && value.field && value.type && value.length && value.fieldName) {
-      let valueSet = [];
-      if (value && value.valueSet && value.valueSet.length > 0) {
-        valueSet = value.valueSet.split('\n');
-      }
-      if (value.segment in this.stateService.FieldsToMask) {
-        this.stateService.addFieldToMask(value.segment, {
-          field: parseInt(value.field),
-          type: value.type,
-          length: parseInt(value.length),
-          subField: parseInt(value.subField),
-          fieldName: value.fieldName,
-          valueSet: valueSet,
-          minLength: parseInt(value.minLength),
-        });
-      } else {
-        this.stateService.FieldsToMask[value.segment] = [];
-        this.stateService.addFieldToMask(value.segment, {
-          field: parseInt(value.field),
-          type: value.type,
-          length: parseInt(value.length),
-          subField: parseInt(value.subField),
-          fieldName: value.fieldName,
-          valueSet: valueSet,
-          minLength: parseInt(value.minLength),
-        });
-      }
-    }
-    localStorage.setItem('fieldsToMask', JSON.stringify(this.stateService.FieldsToMask));
-    this.addFieldsToMaskForm.reset();
-    if (this.phiInputFormControl.dirty) {
-      this.maskPhi();
-    }
-  }
-
-  // copyToClipboard() {
-  //   let element = "maskedPhiValueArea";
-  //   const ansElement = typeof element === 'string' ? document.getElementById(element) : element;
-  //   if (ansElement) {
-  //     const range = document.createRange();
-  //     range.selectNodeContents(ansElement);
-  //     const selection = window.getSelection();
-  //     selection?.removeAllRanges();
-  //     selection?.addRange(range);
-
-  //     try {
-  //       document.execCommand('copy');
-  //       console.log('Content copied to clipboard');
-  //     } catch (err) {
-  //       console.error('Unable to copy text', err);
-  //     }
-  //     selection?.removeAllRanges();
-  //   }
-  // }
 
   copyToClipboard() {
     const text: string = this.maskedPhiValue || '';
@@ -323,5 +176,9 @@ export class PhiMask {
   clearPreferences() {
     localStorage.clear();
     this.stateService.setFieldsToMask({});
+  }
+
+  addSampleMsgToForm() {
+    this.phiInputFormControl.setValue(sampleHL7);
   }
 }

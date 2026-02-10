@@ -21,7 +21,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
-import { KeyValuePipe } from '@angular/common';
+import { KeyValue, KeyValuePipe } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -90,7 +90,6 @@ interface dataSources {
   templateUrl: 'show-fields-dialog.html',
   imports: [
     MatTabsModule,
-    KeyValuePipe,
     MatListModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -116,19 +115,25 @@ export class ShowFieldsDialog {
   constructor() {
     effect(() => {
       this.dataSources = {};
+      this.tabs = [];
       console.log('Value of signal right now');
       console.log(this.stateService.FieldsToMask);
       setTimeout(() => {
         for (let segment in this.stateService.FieldsToMask) {
           this.dataSources[segment] = new MatTableDataSource(
-            this.stateService.FieldsToMask[segment]
+            this.stateService.FieldsToMask[segment],
           );
         }
+        this.tabs = Object.keys(this.dataSources);
       });
     });
   }
 
-  ngOnInit() {}
+  tabs: any;
+
+  ngOnInit() {
+    console.log('Show fields dialog init');
+  }
 
   @ViewChildren(MatPaginator) paginators: QueryList<MatPaginator> | undefined;
 
@@ -178,6 +183,7 @@ export class ShowFieldsDialog {
   removeField(field: any, segment: string) {
     console.log(field, segment);
     this.stateService.removeField(segment, field);
+    localStorage.setItem('fieldsToMask', JSON.stringify(this.stateService.FieldsToMask));
   }
 }
 

@@ -1,0 +1,60 @@
+<div class="absolute top-2 w-[100%] relative">
+  <div class="flex flex-row justify-between">
+    <div class="flex items-center gap-2">
+      <div class="p-1.5 rounded-lg" style="background-color: #1b998b">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+          ></path>
+        </svg>
+      </div>
+      <h1 class="text-xl font-bold text-gray-800">PHI Masking Tool</h1>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <dialog-button
+        class="my-custom-theme"
+        [control]="addFieldsToMaskForm"
+        [dialogButtonText]="'Configure'"
+        [addFieldsToMaskForm]="addFieldsToMaskForm"
+        [maskingTypes]="maskingTypes"
+        (addEvent)="addFieldToMask()"
+      ></dialog-button>
+    </div>
+  </div>
+</div>
+
+<div class="flex flex-col">
+  <div class="mt-10">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+<div class="absolute bottom-0 left-0 right-0">
+  <div class="flex flex-row justify-center items-center">
+    <div class="pr-[20px]">
+      <p class="text-lg align-middle">
+        <mat-icon class="align-middle">folder_code</mat-icon>
+        <a
+          class="text-lg align-middle"
+          href="https://github.com/sambasiva2k2/hl7-phi-masking-tool"
+          target="_blank"
+          >PHI Masking Tool</a
+        >
+      </p>
+    </div>
+    <div>
+      <p class="text-lg align-middle">
+        <mat-icon class="align-middle">account_box</mat-icon>
+        <a
+          class="text-lg align-middle"
+          href="https://www.linkedin.com/in/samba-siva-kalyan-prasad-72b43b23a/"
+          target="_blank"
+          >Samba Siva</a
+        >
+      </p>
+    </div>
+  </div>
+</div>
